@@ -479,6 +479,38 @@ img { max-width: 100%; height: auto; display: block; }
 .social .arrow { margin-left: auto; color: var(--muted); transition: transform 0.2s var(--ease), color 0.2s var(--ease); }
 .social:hover .arrow { color: var(--accent); transform: translate(2px, -2px); }
 
+/* ---------- Contact ---------- */
+
+.contact-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.5rem 1.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--rule);
+  background: var(--ink-raised);
+  text-decoration: none;
+  transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.contact-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.contact-card:active { transform: translateY(0) scale(0.99); }
+.contact-name {
+  font-family: 'Anybody', sans-serif;
+  font-stretch: 75%;
+  font-weight: 750;
+  font-size: 1.7rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.contact-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  color: var(--accent);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
 /* ---------- Scroll reveal ---------- */
 
 @supports (animation-timeline: view()) {

@@ -1,5 +1,5 @@
 <script server>
-import { artist, bio, siteOrigin, socialImage, socials, special } from '../data/site'
+import { artist, bio, contacts, siteOrigin, socialImage, socials, special } from '../data/site'
 import type { Run } from '../data/shows'
 import { BANDSINTOWN_URL, tour } from '../data/shows'
 import { cityRequestFormUuid } from '../data/city-requests'
@@ -93,6 +93,7 @@ const jsonLd = JSON.stringify({
           <a class="nav-link hidden md:inline" href="#tour">Tour</a>
           <a class="nav-link hidden md:inline" href="#special">Special</a>
           <a class="nav-link hidden md:inline" href="#about">About</a>
+          <a class="nav-link hidden md:inline" href="#contact">Contact</a>
           <a class="btn btn-accent btn-sm" href="#tour">Get tickets</a>
         </nav>
       </div>
@@ -284,6 +285,26 @@ const jsonLd = JSON.stringify({
           </ul>
         </div>
       </section>
+      {{-- Contact --}}
+      <section id="contact" class="scroll-mt-16 border-t rule" aria-labelledby="contact-title">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20 md:py-28 grid md:grid-cols-12 gap-10">
+          <div class="md:col-span-4">
+            <h2 id="contact-title" class="heading text-[clamp(2.6rem,5.5vw,4.5rem)]">Contact</h2>
+            <p class="mt-4 text-lg muted max-w-[32ch]">For bookings, press and business enquiries.</p>
+          </div>
+          <ul class="md:col-span-8 grid gap-3 sm:grid-cols-2 list-none p-0 m-0 content-start">
+            @foreach(contacts as contact)
+              <li>
+                <a class="contact-card" href="mailto:{{ contact.email }}">
+                  <span class="text-sm muted">{{ contact.role }}</span>
+                  <span class="contact-name">{{ contact.name }}</span>
+                  <span class="contact-email">{{ contact.email }}<i class="i-hugeicons-mail-01 text-lg" aria-hidden="true"></i></span>
+                </a>
+              </li>
+            @endforeach
+          </ul>
+        </div>
+      </section>
     </main>
 
     <footer class="border-t rule">
@@ -291,6 +312,7 @@ const jsonLd = JSON.stringify({
         <p class="display text-3xl">Mario Adrion</p>
         <nav class="flex flex-wrap gap-x-7 gap-y-3" aria-label="Footer">
           <a class="nav-link" href="#tour">Tour</a>
+          <a class="nav-link" href="#contact">Contact</a>
           <a class="nav-link" href="/tour.ics">Calendar feed</a>
           <a class="nav-link" href="{{ BANDSINTOWN_URL }}" rel="noopener" target="_blank">Bandsintown</a>
           <a class="nav-link" href="{{ artist.imdb }}" rel="noopener" target="_blank">IMDb</a>

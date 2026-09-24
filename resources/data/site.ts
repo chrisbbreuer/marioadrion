@@ -56,6 +56,18 @@ export const special = {
   url: 'https://www.youtube.com/watch?v=0E54LoeEdUc',
 }
 
+export interface Contact {
+  role: string
+  name: string
+  email: string
+}
+
+/** Who to write to, as Mario's team lists it. Business enquiries only. */
+export const contacts: Contact[] = [
+  { role: 'Management', name: 'Stephen Walker', email: 'stephen@wtwtalent.com' },
+  { role: 'Agent', name: 'Valentijn Sloot', email: 'vsloot@gersh.com' },
+]
+
 export interface Social {
   label: string
   handle: string
