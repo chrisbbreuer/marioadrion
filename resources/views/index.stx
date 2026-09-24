@@ -11,6 +11,9 @@ const [upcoming, formUuid] = await Promise.all([tour(), cityRequestFormUuid()])
 const pageTitle = 'Mario Adrion - Stand-up Comedian | Tour Dates and Tickets'
 const pageDescription = `German stand-up comedian Mario Adrion on ${artist.tour}: ${upcoming.shows.length} shows in ${upcoming.cities} cities. Tickets, his debut special My Struggle, and more.`
 const canonicalPath = '/'
+// stx's template evaluator refuses `new`, so a `{{ new Date() }}` in the
+// markup renders empty. Computed here instead.
+const year = new Date().getFullYear()
 
 const lastShow = upcoming.shows.at(-1)
 const firstShow = upcoming.shows[0]
@@ -98,22 +101,22 @@ const jsonLd = JSON.stringify({
     <main id="main">
       {{-- Hero: the name on the poster, the man in the light. --}}
       <section class="relative" aria-labelledby="hero-title">
-        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-10 md:pt-16 grid md:grid-cols-12 gap-8 items-end">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-6 md:pt-16 grid md:grid-cols-12 gap-2 md:gap-8 items-end">
           <div class="md:col-span-7 pb-10 md:pb-24 hero-copy">
             <p class="eyebrow mb-5" style="--i: 0">{{ artist.tour }}</p>
-            <h1 id="hero-title" class="display text-[clamp(5rem,15vw,12.5rem)]" style="--i: 1">Mario<br>Adrion</h1>
+            <h1 id="hero-title" class="display text-[clamp(4.25rem,15vw,12.5rem)]" style="--i: 1">Mario<br>Adrion</h1>
             @if(touringUntil)
-              <p class="mt-7 text-lg md:text-xl muted max-w-[34ch] leading-relaxed" style="--i: 2">Stand-up from a small town in Germany, now based in Los Angeles. On tour through {{ touringUntil }}.</p>
+              <p class="mt-5 md:mt-7 text-lg md:text-xl muted max-w-[34ch] leading-relaxed" style="--i: 2">Stand-up from a small town in Germany, now based in Los Angeles. On tour through {{ touringUntil }}.</p>
             @else
-              <p class="mt-7 text-lg md:text-xl muted max-w-[34ch] leading-relaxed" style="--i: 2">Stand-up from a small town in Germany, now based in Los Angeles.</p>
+              <p class="mt-5 md:mt-7 text-lg md:text-xl muted max-w-[34ch] leading-relaxed" style="--i: 2">Stand-up from a small town in Germany, now based in Los Angeles.</p>
             @endif
-            <div class="mt-9 flex flex-wrap gap-3" style="--i: 3">
+            <div class="mt-7 md:mt-9 flex flex-wrap gap-3" style="--i: 3">
               <a class="btn btn-accent" href="#tour">Get tickets <i class="i-hugeicons-ticket-01 text-lg" aria-hidden="true"></i></a>
               <a class="btn btn-ghost" href="#special">Watch the special</a>
             </div>
           </div>
 
-          <div class="md:col-span-5 hero-stage">
+          <div class="md:col-span-5 hero-stage order-first md:order-none">
             <Photo name="stage-laugh" sizes="(min-width: 768px) 38vw, 90vw" class="hero-figure" :eager="true" />
           </div>
         </div>
@@ -292,7 +295,7 @@ const jsonLd = JSON.stringify({
           <a class="nav-link" href="{{ BANDSINTOWN_URL }}" rel="noopener" target="_blank">Bandsintown</a>
           <a class="nav-link" href="{{ artist.imdb }}" rel="noopener" target="_blank">IMDb</a>
         </nav>
-        <p class="text-sm muted">&copy; {{ new Date().getFullYear() }} Mario Adrion</p>
+        <p class="text-sm muted">&copy; {{ year }} Mario Adrion</p>
       </div>
     </footer>
   </body>
