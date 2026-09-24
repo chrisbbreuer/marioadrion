@@ -23,6 +23,13 @@ function normalizeOrigin(value: string): string {
   return `${local ? 'http' : 'https'}://${trimmed}`
 }
 
+/**
+ * Whether search engines may index this deployment. Only on Mario's own
+ * domain: a preview such as marioadrion.stacksjs.com is a copy of his site
+ * and must not compete with it in search.
+ */
+export const indexable = /^https:\/\/(www\.)?marioadrion\.com$/.test(siteOrigin)
+
 export function absolute(path: string): string {
   return `${siteOrigin}${path.startsWith('/') ? path : `/${path}`}`
 }

@@ -1,6 +1,6 @@
 import { buildCalendarFeed, calendarFeedHeaders } from '@stacksjs/calendar-api'
 import { route } from '@stacksjs/router'
-import { absolute, artist } from '../resources/data/site'
+import { absolute, artist, indexable } from '../resources/data/site'
 import { tour } from '../resources/data/shows'
 
 /**
@@ -38,7 +38,10 @@ route.get('/tour.ics', async () => {
  * origin this build actually runs on (APP_URL), never a hard-coded one.
  */
 route.get('/robots.txt', () => new Response(
-  `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${absolute('/sitemap.xml')}\n`,
+  indexable
+    ? `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${absolute('/sitemap.xml')}\n`
+    // A preview host is a copy of Mario's site; keep it out of search.
+    : 'User-agent: *\nDisallow: /\n',
   { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=3600' } },
 ))
 

@@ -2,7 +2,7 @@
 // Imported here, not inherited from the including page's scope: a partial
 // that leans on the page for shared constants renders them empty on every
 // page that did not happen to import them itself.
-import { siteOrigin, socialImage, socialImageAlt } from '../data/site'
+import { indexable, siteOrigin, socialImage, socialImageAlt } from '../data/site'
 
 // Owned by the including page, which is the one thing a partial should take
 // from its scope. Declared so the template typechecks; `declare` emits no
@@ -20,7 +20,11 @@ declare const jsonLd: string | undefined
 <title>{{ pageTitle }}</title>
 <meta name="description" content="{{ pageDescription }}">
 <link rel="canonical" href="{{ siteOrigin }}{{ canonicalPath }}">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+@if (indexable)
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+@else
+  <meta name="robots" content="noindex, nofollow">
+@endif
 
 {{-- One theme. The brand is a black stage and every photograph is lit for
   it, so the site is dark and says so. --}}
