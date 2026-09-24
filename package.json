@@ -22,7 +22,7 @@
     "url": "https://github.com/stacksjs/stacks/issues"
   },
   "scripts": {
-    "build:reset": "rm -rf node_modules && pantry install && ./buddy generate:types && ./buddy lint:fix && cd storage/framework && bun run build && cd ../../",
+    "build:reset": "rm -rf node_modules pantry.lock && bun install && ./buddy generate:types && ./buddy lint:fix",
     "buddy": "./buddy",
     "stacks": "./buddy",
     "setup": "./bootstrap",
@@ -57,14 +57,14 @@
     "release:major": "./buddy release --bump major",
     "changelog": "./buddy changelog",
     "generate": "./buddy generate",
-    "typecheck": "bun run typecheck:app && bun run typecheck:framework",
+    "typecheck": "bun x --bun tsc --noEmit -p tsconfig.json --pretty false",
     "typecheck:framework": "bun x --bun tsc --noEmit -p storage/framework/tsconfig.framework.json --pretty false && bun x --bun tsc --noEmit -p storage/framework/tsconfig.defaults.json --pretty false",
     "typecheck:app": "bun x --bun tsc --noEmit -p tsconfig.json --pretty false",
     "typecheck:bench": "bun x --bun tsc --noEmit -p bench/tsconfig.json --pretty false",
     "test:bench": "bun test ./bench/memory/*.test.ts ./bench/routing/*.test.ts ./bench/startup/*.test.ts",
     "typecheck:views": "bun x --bun stx typecheck --lib storage/framework/types/request-context.d.ts 'resources/**/*.stx' 'storage/framework/defaults/views/**/*.stx' 'storage/framework/defaults/resources/**/*.stx' 'storage/framework/core/error-handling/src/views/**/*.stx' 'storage/framework/defaults/stores/*.stx' 'storage/framework/libs/examples/**/*.stx'",
     "typecheck:clean": "bunx --bun rimraf storage/framework/.cache/typescript",
-    "types:check": "bun run typecheck",
+    "types:check": "bun x --bun tsc --noEmit -p tsconfig.json --pretty false",
     "types:fix": "./buddy types:fix",
     "bench:memory": "bun bench/memory/run.ts",
     "bench:routing": "bun bench/routing/run.ts",
@@ -99,16 +99,16 @@
     "docs:agent-counts:check": "./buddy docs:agent-counts:check"
   },
   "dependencies": {
-    "@stacksjs/actions": "^0.74.63",
-    "@stacksjs/cache": "^0.74.63",
-    "@stacksjs/calendar-api": "^0.74.63",
-    "@stacksjs/datetime": "^0.74.63",
-    "@stacksjs/env": "^0.74.63",
-    "@stacksjs/forms": "^0.74.63",
-    "@stacksjs/image": "^0.74.63",
-    "@stacksjs/path": "^0.74.63",
+    "@stacksjs/actions": "^0.74.64",
+    "@stacksjs/cache": "^0.74.64",
+    "@stacksjs/calendar-api": "^0.74.64",
+    "@stacksjs/datetime": "^0.74.64",
+    "@stacksjs/env": "^0.74.64",
+    "@stacksjs/forms": "^0.74.64",
+    "@stacksjs/image": "^0.74.64",
+    "@stacksjs/path": "^0.74.64",
     "pickier": "^0.1.65",
-    "stacks": "^0.74.63"
+    "stacks": "^0.74.64"
   },
   "workspaces": [
     "storage/framework",
