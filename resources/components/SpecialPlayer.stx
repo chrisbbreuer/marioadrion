@@ -1,0 +1,31 @@
+<script server>
+const props = defineProps<{ videoId: string }>()
+const videoId = props.videoId
+</script>
+
+<script client>
+// A facade, not an embed. The old page loaded YouTube's player (about a
+// megabyte of script and a round of third-party cookies) for every visitor,
+// whether or not they pressed play. This shows the poster frame from this
+// origin and only asks YouTube for anything once someone does.
+//
+// The still is server-rendered with no binding on it or around it: anything
+// under a client directive is rendered by the client runtime, which cannot
+// run server components. Only the play button and the iframe are bound.
+const host = useRef<HTMLElement>('special-player')
+const playing = state(false)
+const embed = derived(() => {
+  const id = host()?.dataset.videoId ?? ''
+  return playing() && id ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0` : ''
+})
+</script>
+
+<template>
+  <div ref="special-player" data-video-id="{{ videoId }}" class="special-frame">
+    <Photo name="my-struggle" sizes="(min-width: 1024px) 62vw, 100vw" class="special-still" />
+    <button type="button" class="special-poster" @click="playing.set(true)" aria-label="Play My Struggle, the full special">
+      <span class="special-play" aria-hidden="true"><i class="i-hugeicons-play"></i></span>
+    </button>
+    <iframe :if="playing()" :src="embed()" title="My Struggle by Mario Adrion" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</template>

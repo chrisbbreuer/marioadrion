@@ -1,0 +1,37 @@
+{
+  "stage-laugh": {
+    "width": 1600,
+    "height": 2000,
+    "srcset": "/images/mario/stage-laugh-480x600-3dafe63b08f00de7.webp 480w, /images/mario/stage-laugh-720x900-da4864adf3e862e0.webp 720w, /images/mario/stage-laugh-960x1200-b44ba162a29b5245.webp 960w, /images/mario/stage-laugh-1280x1600-2eb4383d2c3c9696.webp 1280w",
+    "fallback": "/images/mario/stage-laugh-720x900-ff0e43df6ca7ca36.png",
+    "placeholder": "KhCIriCRR3w1Hdza7io5Pg"
+  },
+  "portrait": {
+    "width": 1200,
+    "height": 2214,
+    "srcset": "/images/mario/portrait-420x775-3e3eac2a0fb007f7.webp 420w, /images/mario/portrait-640x1181-172b060ec23529b0.webp 640w, /images/mario/portrait-900x1661-3023b57892122319.webp 900w",
+    "fallback": "/images/mario/portrait-640x1181-3805b4ebd0b85868.png",
+    "placeholder": "SjBmrmKJN3LE3cETITbjUg"
+  },
+  "mic-mono": {
+    "width": 1000,
+    "height": 1829,
+    "srcset": "/images/mario/mic-mono-360x658-105e58295619fb46.webp 360w, /images/mario/mic-mono-560x1024-3df16cf9c26afe84.webp 560w, /images/mario/mic-mono-800x1463-3c6e56514c001152.webp 800w",
+    "fallback": "/images/mario/mic-mono-560x1024-2d8915e6dce80780.png",
+    "placeholder": "Xe-ItiDJKI0kojdTDidhUg"
+  },
+  "live": {
+    "width": 720,
+    "height": 720,
+    "srcset": "/images/mario/live-480x480-79a8238f459f8c82.webp 480w, /images/mario/live-720x720-9751a5ba36174cf1.webp 720w",
+    "fallback": "/images/mario/live-720x720-e0e800090107323c.jpg",
+    "placeholder": "dg96redSSGHEnclbKKmFbA"
+  },
+  "my-struggle": {
+    "width": 1280,
+    "height": 720,
+    "srcset": "/images/mario/my-struggle-640x360-ff04df8b5167046f.webp 640w, /images/mario/my-struggle-960x540-6ea4988275ab9116.webp 960w, /images/mario/my-struggle-1280x720-2cd3dd07f3a679eb.webp 1280w",
+    "fallback": "/images/mario/my-struggle-960x540-10169eb2a8b76a0f.jpg",
+    "placeholder": "XeyncmbtuJLFYdWa6KmzPg"
+  }
+}

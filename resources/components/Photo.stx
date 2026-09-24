@@ -1,0 +1,31 @@
+<script server>
+import manifest from '../data/photos.manifest.json'
+import { photos } from '../data/photos'
+
+/**
+ * One photograph from `buddy images:build`: WebP at every built width, the
+ * fallback for browsers without it, intrinsic size to hold the layout, and
+ * the alt text from resources/data/photos.ts so it cannot drift per page.
+ */
+const props = defineProps<{
+  name: keyof typeof photos
+  sizes: string
+  class?: string
+  eager?: boolean
+}>()
+
+const entry = manifest[props.name]
+const alt = photos[props.name].alt
+const sizes = props.sizes
+const className = props.class ?? ''
+const eager = props.eager === true
+</script>
+
+<picture>
+  <source type="image/webp" srcset="{{ entry.srcset }}" sizes="{{ sizes }}">
+  @if(eager)
+    <img class="{{ className }}" src="{{ entry.fallback }}" width="{{ entry.width }}" height="{{ entry.height }}" alt="{{ alt }}" fetchpriority="high" decoding="async">
+  @else
+    <img class="{{ className }}" src="{{ entry.fallback }}" width="{{ entry.width }}" height="{{ entry.height }}" alt="{{ alt }}" loading="lazy" decoding="async">
+  @endif
+</picture>

@@ -1,0 +1,4 @@
+{
+  "comment": "Known docs-import failures. Run `buddy docs:snippets` after fixing some, and commit the shorter list. See stacksjs/stacks#2580.",
+  "known": []
+}

@@ -1,0 +1,299 @@
+<script server>
+import { artist, bio, siteOrigin, socialImage, socials, special } from '../data/site'
+import type { Run } from '../data/shows'
+import { BANDSINTOWN_URL, tour } from '../data/shows'
+import { cityRequestFormUuid } from '../data/city-requests'
+
+// One await for the whole page. stx drops every const after a second
+// top-level await, so both sources resolve together.
+const [upcoming, formUuid] = await Promise.all([tour(), cityRequestFormUuid()])
+
+const pageTitle = 'Mario Adrion - Stand-up Comedian | Tour Dates and Tickets'
+const pageDescription = `German stand-up comedian Mario Adrion on ${artist.tour}: ${upcoming.shows.length} shows in ${upcoming.cities} cities. Tickets, his debut special My Struggle, and more.`
+const canonicalPath = '/'
+
+const lastShow = upcoming.shows.at(-1)
+const firstShow = upcoming.shows[0]
+const touringUntil = lastShow ? new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: lastShow.timeZone }).format(lastShow.startsAt) : ''
+const touringFrom = firstShow ? new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: firstShow.timeZone }).format(firstShow.startsAt) : ''
+
+// Runs grouped under their month, for the sticky month labels.
+const months: { label: string, runs: Run[] }[] = []
+for (const run of upcoming.runs) {
+  const label = `${run.shows[0]!.month} ${run.year}`
+  const current = months.at(-1)
+  if (current && current.label === label)
+    current.runs.push(run)
+  else
+    months.push({ label, runs: [run] })
+}
+
+// Every city once, in tour order, for the marquee. Rendered twice so the
+// loop has no seam; the second copy is hidden from assistive tech.
+const cities = [...new Set(upcoming.runs.map(run => run.place))]
+
+const person = {
+  '@type': 'Person',
+  '@id': `${siteOrigin}/#mario`,
+  'name': artist.name,
+  'url': `${siteOrigin}/`,
+  'image': socialImage,
+  'jobTitle': 'Stand-up comedian',
+  'homeLocation': { '@type': 'Place', 'name': 'Los Angeles, CA' },
+  'sameAs': [...socials.map(social => social.href), artist.imdb, BANDSINTOWN_URL],
+}
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    person,
+    ...upcoming.shows.map(show => ({
+      '@type': 'ComedyEvent',
+      'name': `${artist.name}: ${artist.tour}`,
+      'startDate': show.startIso,
+      'eventStatus': 'https://schema.org/EventScheduled',
+      'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+      'location': {
+        '@type': 'Place',
+        'name': show.venue.name,
+        'address': {
+          '@type': 'PostalAddress',
+          'streetAddress': show.venue.street,
+          'addressLocality': show.venue.city,
+          'addressRegion': show.venue.region,
+          'postalCode': show.venue.postalCode,
+          'addressCountry': show.venue.country,
+        },
+      },
+      'image': socialImage,
+      'performer': { '@id': `${siteOrigin}/#mario` },
+      'offers': {
+        '@type': 'Offer',
+        'url': show.ticketUrl,
+        'availability': show.soldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+      },
+    })),
+  ],
+}).replaceAll('<', '\\u003c')
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>@include('head')</head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-nav">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-6">
+        <a href="/" class="display text-[1.65rem] leading-none tracking-tight no-underline" aria-label="Mario Adrion, home">Mario Adrion</a>
+        <nav class="flex items-center gap-7" aria-label="Primary">
+          <a class="nav-link hidden md:inline" href="#tour">Tour</a>
+          <a class="nav-link hidden md:inline" href="#special">Special</a>
+          <a class="nav-link hidden md:inline" href="#about">About</a>
+          <a class="btn btn-accent btn-sm" href="#tour">Get tickets</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      {{-- Hero: the name on the poster, the man in the light. --}}
+      <section class="relative" aria-labelledby="hero-title">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-10 md:pt-16 grid md:grid-cols-12 gap-8 items-end">
+          <div class="md:col-span-7 pb-10 md:pb-24 hero-copy">
+            <p class="eyebrow mb-5" style="--i: 0">{{ artist.tour }}</p>
+            <h1 id="hero-title" class="display text-[clamp(5rem,15vw,12.5rem)]" style="--i: 1">Mario<br>Adrion</h1>
+            @if(touringUntil)
+              <p class="mt-7 text-lg md:text-xl muted max-w-[34ch] leading-relaxed" style="--i: 2">Stand-up from a small town in Germany, now based in Los Angeles. On tour through {{ touringUntil }}.</p>
+            @else
+              <p class="mt-7 text-lg md:text-xl muted max-w-[34ch] leading-relaxed" style="--i: 2">Stand-up from a small town in Germany, now based in Los Angeles.</p>
+            @endif
+            <div class="mt-9 flex flex-wrap gap-3" style="--i: 3">
+              <a class="btn btn-accent" href="#tour">Get tickets <i class="i-hugeicons-ticket-01 text-lg" aria-hidden="true"></i></a>
+              <a class="btn btn-ghost" href="#special">Watch the special</a>
+            </div>
+          </div>
+
+          <div class="md:col-span-5 hero-stage">
+            <Photo name="stage-laugh" sizes="(min-width: 768px) 38vw, 90vw" class="hero-figure" :eager="true" />
+          </div>
+        </div>
+      </section>
+
+      @if(cities.length > 0)
+        <div class="marquee" aria-hidden="true">
+          <div class="marquee-track">
+            @foreach(cities as city)
+              <span>{{ city }}</span>
+            @endforeach
+            @foreach(cities as city)
+              <span>{{ city }}</span>
+            @endforeach
+          </div>
+        </div>
+      @endif
+
+      {{-- Tour --}}
+      <section id="tour" class="scroll-mt-16 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20 md:py-28" aria-labelledby="tour-title">
+        <div class="max-w-3xl">
+          <h2 id="tour-title" class="heading text-[clamp(3rem,7vw,5.5rem)]">On tour</h2>
+          @if(upcoming.shows.length > 0)
+            <p class="mt-5 text-lg muted">{{ upcoming.shows.length }} shows in {{ upcoming.cities }} cities, {{ touringFrom }} to {{ touringUntil }}. Tap a showtime for tickets.</p>
+          @endif
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a class="btn btn-ghost btn-sm" href="/tour.ics"><i class="i-hugeicons-calendar-add-01 text-base" aria-hidden="true"></i> Add every date to your calendar</a>
+            <a class="btn btn-ghost btn-sm" href="{{ BANDSINTOWN_URL }}" rel="noopener" target="_blank"><i class="i-hugeicons-notification-01 text-base" aria-hidden="true"></i> Get alerts on Bandsintown</a>
+          </div>
+        </div>
+
+        @if(upcoming.shows.length === 0)
+          <div class="mt-14 surface rounded-[14px] p-8 max-w-2xl">
+            <p class="text-xl font-semibold">No dates on sale right now.</p>
+            <p class="mt-2 muted">New shows land on Bandsintown first. Follow Mario there and you will hear the moment they go on sale.</p>
+          </div>
+        @else
+          <div class="mt-14 grid gap-12">
+            @foreach(months as month)
+              <div class="grid lg:grid-cols-[11rem_minmax(0,1fr)] gap-4 lg:gap-10">
+                <div>
+                  <h3 class="month-label heading text-2xl muted">{{ month.label }}</h3>
+                </div>
+                <ol class="list-none m-0 p-0">
+                  @foreach(month.runs as run)
+                    <li class="run reveal">
+                      <p class="run-dates">{{ run.dates }}</p>
+                      <div>
+                        <p class="run-place">{{ run.place }}</p>
+                        <p class="mt-1.5 muted">{{ run.venue.name }}</p>
+                      </div>
+                      <div class="times" role="list" aria-label="Showtimes at {{ run.venue.name }}">
+                        @foreach(run.shows as show)
+                          @if(show.soldOut)
+                            <span class="time-chip" role="listitem" aria-disabled="true">
+                              <span class="when">{{ show.weekday }} {{ show.time }}</span>
+                              <span class="cta">Sold out</span>
+                            </span>
+                          @else
+                            <a class="time-chip" role="listitem" href="{{ show.ticketUrl }}" rel="noopener" target="_blank" aria-label="Tickets for {{ show.weekday }} {{ show.month }} {{ show.day }} at {{ show.time }}, {{ run.venue.name }}">
+                              <span class="when">{{ show.weekday }} {{ show.time }}</span>
+                              <span class="cta">Tickets</span>
+                            </a>
+                          @endif
+                        @endforeach
+                      </div>
+                    </li>
+                  @endforeach
+                </ol>
+              </div>
+            @endforeach
+          </div>
+        @endif
+      </section>
+
+      {{-- The one question the old site asked and never collected. --}}
+      <section class="border-y rule" aria-labelledby="request-title">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 grid md:grid-cols-12 gap-10 items-end">
+          <div class="md:col-span-4 hidden md:block">
+            <Photo name="mic-mono" sizes="(min-width: 768px) 22rem, 0px" class="w-full max-w-[22rem] mt-12" />
+          </div>
+          <div class="md:col-span-8 lg:col-span-7 lg:col-start-6 py-16 md:py-24">
+            <h2 id="request-title" class="heading text-[clamp(2.6rem,5.5vw,4.5rem)]">Don't see your city?</h2>
+            <p class="mt-4 text-lg muted max-w-[46ch]">Tell me where to perform. Leave your city, and your email if you want to hear when tickets go on sale there.</p>
+            <div class="mt-9">
+              @if(formUuid)
+                <CityRequestForm :form-uuid="formUuid" />
+              @else
+                <p class="muted">The request form is resting. Follow Mario on Bandsintown to hear about new cities first.</p>
+              @endif
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {{-- Special --}}
+      <section id="special" class="scroll-mt-16 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20 md:py-28" aria-labelledby="special-title">
+        <div class="grid lg:grid-cols-12 gap-10 items-center">
+          <div class="lg:col-span-8 reveal">
+            <SpecialPlayer :video-id="special.youtubeId" />
+          </div>
+          <div class="lg:col-span-4">
+            <p class="eyebrow mb-4">Debut special</p>
+            <h2 id="special-title" class="heading text-[clamp(3rem,6vw,5rem)]">{{ special.title }}</h2>
+            <p class="mt-5 text-lg muted max-w-[36ch]">Mario's first hour. It premiered on YouTube in {{ special.premiered }} and it is free to watch, start to finish.</p>
+            <a class="btn btn-ghost mt-8" href="{{ special.url }}" rel="noopener" target="_blank">Open on YouTube <i class="i-hugeicons-arrow-up-right-01 text-lg" aria-hidden="true"></i></a>
+          </div>
+        </div>
+      </section>
+
+      {{-- About --}}
+      <section id="about" class="scroll-mt-16 border-t rule" aria-labelledby="about-title">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20 md:py-28 grid md:grid-cols-12 gap-10 lg:gap-16 items-center">
+          <div class="md:col-span-5 order-last md:order-first">
+            <Photo name="portrait" sizes="(min-width: 768px) 26rem, 80vw" class="w-full max-w-[26rem] mx-auto" />
+          </div>
+          <div class="md:col-span-7">
+            <h2 id="about-title" class="heading text-[clamp(3rem,6vw,5rem)]">About Mario</h2>
+            <div class="prose-bio mt-7 text-lg leading-relaxed max-w-[62ch] text-[#d9d6ce]">
+              @foreach(bio as paragraph)
+                <p>{{ paragraph }}</p>
+              @endforeach
+            </div>
+          </div>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pb-20 md:pb-28">
+          <div class="grid gap-4 md:grid-cols-3 md:grid-rows-2">
+            <figure class="fact fact-photo md:row-span-2 m-0 reveal">
+              <Photo name="live" sizes="(min-width: 768px) 33vw, 100vw" />
+            </figure>
+            <div class="fact fact-accent md:col-span-2 reveal">
+              <p class="fact-figure">4 million+</p>
+              <p class="mt-3 text-lg muted max-w-[40ch]">people follow the clips Mario posts across his social channels.</p>
+            </div>
+            <div class="fact reveal">
+              <p class="fact-figure">2 tours</p>
+              <p class="mt-3 muted">{{ artist.previousTour }}, then {{ artist.tour }}.</p>
+            </div>
+            <div class="fact reveal">
+              <p class="fact-figure">Sold out</p>
+              <p class="mt-3 muted">Shows across the US, UK, Europe and the Middle East.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {{-- Follow --}}
+      <section class="border-t rule" aria-labelledby="follow-title">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-20 md:py-28">
+          <h2 id="follow-title" class="heading text-[clamp(2.6rem,5.5vw,4.5rem)]">Follow Mario</h2>
+          <ul class="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 list-none p-0 m-0">
+            @foreach(socials as social)
+              <li>
+                <a class="social" href="{{ social.href }}" rel="noopener me" target="_blank">
+                  <i class="icon {{ social.icon }}" aria-hidden="true"></i>
+                  <span>
+                    <span class="block font-semibold">{{ social.label }}</span>
+                    <span class="block text-sm muted">{{ social.handle }}</span>
+                  </span>
+                  <i class="arrow i-hugeicons-arrow-up-right-01 text-xl" aria-hidden="true"></i>
+                </a>
+              </li>
+            @endforeach
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t rule">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+        <p class="display text-3xl">Mario Adrion</p>
+        <nav class="flex flex-wrap gap-x-7 gap-y-3" aria-label="Footer">
+          <a class="nav-link" href="#tour">Tour</a>
+          <a class="nav-link" href="/tour.ics">Calendar feed</a>
+          <a class="nav-link" href="{{ BANDSINTOWN_URL }}" rel="noopener" target="_blank">Bandsintown</a>
+          <a class="nav-link" href="{{ artist.imdb }}" rel="noopener" target="_blank">IMDb</a>
+        </nav>
+        <p class="text-sm muted">&copy; {{ new Date().getFullYear() }} Mario Adrion</p>
+      </div>
+    </footer>
+  </body>
+</html>

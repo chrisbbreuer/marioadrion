@@ -1,0 +1,90 @@
+<script server>
+const props = defineProps<{ formUuid?: string | null }>()
+const formUuid = props.formUuid ?? ''
+</script>
+
+<script client>
+// The uuid rides on a data attribute because a client script cannot read the
+// server block's props. The element carrying it has no bindings of its own,
+// so the server interpolation on it survives hydration.
+const host = useRef<HTMLElement>('city-form')
+const city = state('')
+const region = state('')
+const email = state('')
+const trap = state('')
+const sending = state(false)
+const done = state('')
+const errors = state<Record<string, string>>({})
+const openedAt = Date.now()
+
+async function submit(event: Event): Promise<void> {
+  event.preventDefault()
+  if (sending())
+    return
+
+  if (!city().trim()) {
+    errors.set({ city: 'Which city should Mario play?' })
+    return
+  }
+
+  sending.set(true)
+  errors.set({})
+
+  // useMutation rather than fetch(): the submit route is CSRF-protected, and
+  // the data layer is what repeats the page's CSRF cookie in the header.
+  try {
+    const uuid = host()?.dataset.formUuid
+    const body = await useMutation(`/api/forms/${uuid}/submissions`).mutate({
+      city: city().trim(),
+      region: region().trim(),
+      email: email().trim(),
+      _hp: trap(),
+      _renderedMs: Date.now() - openedAt,
+    })
+    done.set(body?.message ?? 'Thanks. Your city is on the list.')
+  }
+  catch (failure) {
+    const { status, data } = failure as { status?: number, data?: { errors?: Record<string, string>, message?: string } }
+    if (status === 422)
+      errors.set(data?.errors ?? {})
+    else
+      errors.set({ _form: data?.message ?? 'That did not go through. Please try again.' })
+  }
+  finally {
+    sending.set(false)
+  }
+}
+</script>
+
+<template>
+  <div ref="city-form" data-form-uuid="{{ formUuid }}" class="city-form">
+    <p :if="done()" class="city-done" role="status">{{ done() }}</p>
+
+    <form :else @submit="submit" novalidate>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid gap-2">
+          <label for="city-name" class="field-label">City</label>
+          <input id="city-name" name="city" type="text" autocomplete="address-level2" required class="field" @input="city.set($event.target.value)">
+          <p :if="errors().city" class="field-error">{{ errors().city }}</p>
+        </div>
+        <div class="grid gap-2">
+          <label for="city-region" class="field-label">State or country</label>
+          <input id="city-region" name="region" type="text" autocomplete="address-level1" class="field" @input="region.set($event.target.value)">
+        </div>
+        <div class="grid gap-2 sm:col-span-2">
+          <label for="city-email" class="field-label">Email <span class="field-hint">optional, to hear when tickets go on sale</span></label>
+          <input id="city-email" name="email" type="email" autocomplete="email" class="field" @input="email.set($event.target.value)">
+          <p :if="errors().email" class="field-error">{{ errors().email }}</p>
+        </div>
+      </div>
+
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="field-trap" @input="trap.set($event.target.value)">
+
+      <p :if="errors()._form" class="field-error mt-4" role="alert">{{ errors()._form }}</p>
+
+      <button type="submit" class="btn btn-accent mt-7" :disabled="sending()">
+        {{ sending() ? 'Sending...' : 'Send it' }}
+      </button>
+    </form>
+  </div>
+</template>
