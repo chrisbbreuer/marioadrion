@@ -1,4 +1,7 @@
+import type { SeoMeta } from '@stacksjs/stx'
+import { existsSync, readFileSync } from 'node:fs'
 import { env } from '@stacksjs/env'
+import { publicPath } from '@stacksjs/path'
 
 /**
  * Everything about Mario that the pages print, in one place.
@@ -94,5 +97,54 @@ export const socials: Social[] = [
 
 export const navSocials: Social[] = socials.filter(social => social.nav)
 
-export const socialImage = absolute('/social/og.jpg')
-export const socialImageAlt = 'Mario Adrion laughing on stage with a microphone'
+/**
+ * The share card `buddy generate:images` renders from config/images.ts.
+ *
+ * Versioned by its content: scrapers (Facebook, X, iMessage, Slack) and the
+ * Cloudflare edge all cache an image by URL, so regenerating the card under
+ * the same URL would leave every existing preview on the old one.
+ */
+function versioned(publicFile: string): string {
+  const file = publicPath(publicFile)
+  const version = existsSync(file) ? Bun.hash(readFileSync(file)).toString(36).slice(0, 8) : ''
+  return absolute(`/${publicFile}${version ? `?v=${version}` : ''}`)
+}
+
+/** 1200x630, for share cards. */
+export const socialImage = versioned('social/og.jpg')
+/** 1200x1200, the `square` preset: search results want more than one aspect ratio. */
+export const socialImageSquare = versioned('social/og-square.jpg')
+export const socialImageAlt = 'Mario Adrion laughing on stage with a microphone, beside the words The Superior Comedy Tour'
+
+/**
+ * Everything a page's <head> says about it to search engines and share
+ * cards, for stx's `useSeoMeta`. One source, so the title, the Open Graph
+ * card and the X card cannot disagree.
+ */
+export function pageSeo(page: { title: string, description: string, path: string }): SeoMeta {
+  const url = absolute(page.path)
+
+  return {
+    title: page.title,
+    description: page.description,
+    canonical: url,
+    robots: indexable ? 'index, follow, max-image-preview:large, max-snippet:-1' : 'noindex, nofollow',
+
+    ogType: 'profile',
+    ogSiteName: artist.name,
+    ogLocale: 'en_US',
+    ogUrl: url,
+    ogImage: socialImage,
+    ogImageType: 'image/jpeg',
+    ogImageWidth: 1200,
+    ogImageHeight: 630,
+    ogImageAlt: socialImageAlt,
+    profileFirstName: 'Mario',
+    profileLastName: 'Adrion',
+    profileUsername: 'marioadrion',
+
+    twitterCard: 'summary_large_image',
+    twitterSite: '@marioadrion',
+    twitterCreator: '@marioadrion',
+  }
+}

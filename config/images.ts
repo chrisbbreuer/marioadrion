@@ -36,7 +36,6 @@ export default {
     publicPath: '/social',
     presets: ['og', 'square'],
     format: 'jpeg',
-    brand: 'Mario Adrion',
     // The cutout stands on the card the way it stands in the hero. It is not
     // a screenshot, so no frame, corner radius or drop shadow.
     foreground: 'resources/images/stage-laugh.png',

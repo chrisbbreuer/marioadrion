@@ -1,5 +1,5 @@
 <script server>
-import { artist, bio, contacts, navSocials, siteOrigin, socialImage, socials, special } from '../data/site'
+import { artist, bio, contacts, navSocials, pageSeo, siteOrigin, socialImage, socialImageSquare, socials, special } from '../data/site'
 import type { Run } from '../data/shows'
 import { BANDSINTOWN_URL, tour } from '../data/shows'
 import { cityRequestFormUuid } from '../data/city-requests'
@@ -8,9 +8,11 @@ import { cityRequestFormUuid } from '../data/city-requests'
 // top-level await, so both sources resolve together.
 const [upcoming, formUuid] = await Promise.all([tour(), cityRequestFormUuid()])
 
-const pageTitle = 'Mario Adrion - Stand-up Comedian | Tour Dates and Tickets'
-const pageDescription = `German stand-up comedian Mario Adrion on ${artist.tour}: ${upcoming.shows.length} shows in ${upcoming.cities} cities. Tickets, his debut special My Struggle, and more.`
-const canonicalPath = '/'
+useSeoMeta(pageSeo({
+  title: 'Mario Adrion - Stand-up Comedian | Tour Dates and Tickets',
+  description: `German stand-up comedian Mario Adrion on ${artist.tour}: ${upcoming.shows.length} shows in ${upcoming.cities} cities. Tickets, his debut special My Struggle, and more.`,
+  path: '/',
+}))
 // stx's template evaluator refuses `new`, so a `{{ new Date() }}` in the
 // markup renders empty. Computed here instead.
 const year = new Date().getFullYear()
@@ -40,7 +42,7 @@ const person = {
   '@id': `${siteOrigin}/#mario`,
   'name': artist.name,
   'url': `${siteOrigin}/`,
-  'image': socialImage,
+  'image': [socialImage, socialImageSquare],
   'jobTitle': 'Stand-up comedian',
   'homeLocation': { '@type': 'Place', 'name': 'Los Angeles, CA' },
   'sameAs': [...socials.map(social => social.href), artist.imdb, BANDSINTOWN_URL],
@@ -68,7 +70,7 @@ const jsonLd = JSON.stringify({
           'addressCountry': show.venue.country,
         },
       },
-      'image': socialImage,
+      'image': [socialImage, socialImageSquare],
       'performer': { '@id': `${siteOrigin}/#mario` },
       'offers': {
         '@type': 'Offer',
