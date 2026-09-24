@@ -40,9 +40,14 @@ export default {
     // a screenshot, so no frame, corner radius or drop shadow.
     foreground: 'resources/images/stage-laugh.png',
     device: { radius: 0, shadow: false },
+    // Sized for where the card is actually seen: ~500px wide in a timeline
+    // and ~300px in a chat thread. At the renderer's defaults the subtitle
+    // came out near 7px there. The name breaks over two lines, as in the hero.
+    // Check any change at 300px: `sips -Z 300 public/social/og.jpg --out x.jpg`.
+    text: { titleSize: 136, eyebrowSize: 36, subtitleSize: 42 },
     // No dates on the card: a generated image outlives the tour it names.
     pages: [
-      { path: '/', eyebrow: 'The Superior Comedy Tour', title: 'Mario Adrion', subtitle: 'Stand-up comedian from Germany, based in Los Angeles.' },
+      { path: '/', eyebrow: 'The Superior Comedy Tour', title: 'Mario Adrion', subtitle: 'German stand-up, based in Los Angeles.' },
     ],
   },
 
