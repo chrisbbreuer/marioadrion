@@ -72,17 +72,27 @@ export interface Social {
   label: string
   handle: string
   href: string
+  /**
+   * An Iconify class from hugeicons, the one collection this project installs
+   * (@iconify-json/hugeicons). A class from any other collection renders
+   * nothing at all, with no build error, which is how every one of these
+   * came to be blank.
+   */
   icon: string
+  /** Also shown as an icon button in the top nav. */
+  nav?: boolean
 }
 
 export const socials: Social[] = [
-  { label: 'Instagram', handle: '@marioadrion', href: 'https://www.instagram.com/marioadrion/', icon: 'i-simple-icons-instagram' },
-  { label: 'TikTok', handle: '@marioadrioncomedy1', href: 'https://www.tiktok.com/@marioadrioncomedy1', icon: 'i-simple-icons-tiktok' },
-  { label: 'YouTube', handle: '@marioadrioncomedy', href: 'https://www.youtube.com/@marioadrioncomedy', icon: 'i-simple-icons-youtube' },
-  { label: 'X', handle: '@marioadrion', href: 'https://x.com/marioadrion', icon: 'i-simple-icons-x' },
-  { label: 'Facebook', handle: 'marioadrion', href: 'https://www.facebook.com/marioadrion', icon: 'i-simple-icons-facebook' },
-  { label: 'Threads', handle: '@marioadrion', href: 'https://www.threads.net/@marioadrion', icon: 'i-simple-icons-threads' },
+  { label: 'Instagram', handle: '@marioadrion', href: 'https://www.instagram.com/marioadrion/', icon: 'i-hugeicons-instagram', nav: true },
+  { label: 'TikTok', handle: '@marioadrioncomedy1', href: 'https://www.tiktok.com/@marioadrioncomedy1', icon: 'i-hugeicons-tiktok', nav: true },
+  { label: 'YouTube', handle: '@marioadrioncomedy', href: 'https://www.youtube.com/@marioadrioncomedy', icon: 'i-hugeicons-youtube', nav: true },
+  { label: 'X', handle: '@marioadrion', href: 'https://x.com/marioadrion', icon: 'i-hugeicons-new-twitter' },
+  { label: 'Facebook', handle: 'marioadrion', href: 'https://www.facebook.com/marioadrion', icon: 'i-hugeicons-facebook-01' },
+  { label: 'Threads', handle: '@marioadrion', href: 'https://www.threads.net/@marioadrion', icon: 'i-hugeicons-threads' },
 ]
+
+export const navSocials: Social[] = socials.filter(social => social.nav)
 
 export const socialImage = absolute('/social/og.jpg')
 export const socialImageAlt = 'Mario Adrion laughing on stage with a microphone'

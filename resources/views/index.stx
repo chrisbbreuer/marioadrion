@@ -1,5 +1,5 @@
 <script server>
-import { artist, bio, contacts, siteOrigin, socialImage, socials, special } from '../data/site'
+import { artist, bio, contacts, navSocials, siteOrigin, socialImage, socials, special } from '../data/site'
 import type { Run } from '../data/shows'
 import { BANDSINTOWN_URL, tour } from '../data/shows'
 import { cityRequestFormUuid } from '../data/city-requests'
@@ -94,6 +94,11 @@ const jsonLd = JSON.stringify({
           <a class="nav-link hidden md:inline" href="#special">Special</a>
           <a class="nav-link hidden md:inline" href="#about">About</a>
           <a class="nav-link hidden md:inline" href="#contact">Contact</a>
+          <span class="nav-socials hidden sm:flex">
+            @foreach(navSocials as social)
+              <a class="icon-btn" href="{{ social.href }}" rel="noopener me" target="_blank" aria-label="Mario Adrion on {{ social.label }}" title="{{ social.label }}"><i class="{{ social.icon }}" aria-hidden="true"></i></a>
+            @endforeach
+          </span>
           <a class="btn btn-accent btn-sm" href="#tour">Get tickets</a>
         </nav>
       </div>
