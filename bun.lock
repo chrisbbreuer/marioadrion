@@ -256,7 +256,7 @@
 
     "@stacksjs/ts-validation": ["@stacksjs/ts-validation@0.5.6", "", {}, "sha512-JUWD4ZfbhgIqXJMAaG4YAKUKIudr61Pa1yr0LwjxX5aJfBeN5vexN+iNacjZ1Vp+WTusIuebQnWroU0OKhA9ow=="],
 
-    "@stacksjs/ts-webp": ["@stacksjs/ts-webp@0.1.5", "", {}, "sha512-mnLVJ1hAy0XgV5yrsaeyQCRR5WdiSOyEMGVRirBnkY6lC3qTqalT8hDm1SKhbdREzOMXc48vS+k5lywODZ/h9A=="],
+    "@stacksjs/ts-webp": ["@stacksjs/ts-webp@0.1.6", "", {}, "sha512-ItNO8ywYArSNhtYQagrafbrc3OroGTxnZ6Dgv4SfFIpj5SoAG/CJniM4RknBTu9mVZEkMOsyAb65fCPXczqSMg=="],
 
     "@stacksjs/ts-xml": ["@stacksjs/ts-xml@0.1.2", "", {}, "sha512-G20EuKCmpwWwnXfFlX0kxCXnJ6ocTgBl8lcHkOzmomC8L/Ld+UKeNLlvOQf9ArnS7/SHUQ2+fZpM0t6lhwoyPw=="],
 
