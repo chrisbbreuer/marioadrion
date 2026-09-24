@@ -140,7 +140,7 @@ const jsonLd = JSON.stringify({
         <div class="max-w-3xl">
           <h2 id="tour-title" class="heading text-[clamp(3rem,7vw,5.5rem)]">On tour</h2>
           @if(upcoming.shows.length > 0)
-            <p class="mt-5 text-lg muted">{{ upcoming.shows.length }} shows in {{ upcoming.cities }} cities, {{ touringFrom }} to {{ touringUntil }}. Tap a showtime for tickets.</p>
+            <p class="mt-5 text-lg muted">{{ upcoming.shows.length }} shows in {{ upcoming.cities }} cities, {{ touringFrom }} to {{ touringUntil }}. Pick a showtime for tickets.</p>
           @endif
           <div class="mt-7 flex flex-wrap gap-3">
             <a class="btn btn-ghost btn-sm" href="/tour.ics"><i class="i-hugeicons-calendar-add-01 text-base" aria-hidden="true"></i> Add every date to your calendar</a>
@@ -253,8 +253,8 @@ const jsonLd = JSON.stringify({
               <p class="mt-3 text-lg muted max-w-[40ch]">people follow the clips Mario posts across his social channels.</p>
             </div>
             <div class="fact reveal">
-              <p class="fact-figure">2 tours</p>
-              <p class="mt-3 muted">{{ artist.previousTour }}, then {{ artist.tour }}.</p>
+              <p class="fact-figure">Worldwide</p>
+              <p class="mt-3 muted">{{ artist.previousTour }}, then the even bigger {{ artist.tour }}, in clubs and theaters.</p>
             </div>
             <div class="fact reveal">
               <p class="fact-figure">Sold out</p>
