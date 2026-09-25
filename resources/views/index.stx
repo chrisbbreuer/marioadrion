@@ -1,5 +1,6 @@
 <script server>
-import { artist, bio, contacts, navSocials, pageSeo, siteOrigin, socialImage, socialImageSquare, socials, special } from '../data/site'
+import { artist, bio, contacts, pageSeo, socials, special } from '../data/site'
+import { comedyEvent, jsonLdGraph, person } from '../data/structured-data'
 import type { Run } from '../data/shows'
 import { BANDSINTOWN_URL, tour } from '../data/shows'
 import { cityRequestFormUuid } from '../data/city-requests'
@@ -13,9 +14,6 @@ useSeoMeta(pageSeo({
   description: `German stand-up comedian Mario Adrion on ${artist.tour}: ${upcoming.shows.length} shows in ${upcoming.cities} cities. Tickets, his debut special My Struggle, and more.`,
   path: '/',
 }))
-// stx's template evaluator refuses `new`, so a `{{ new Date() }}` in the
-// markup renders empty. Computed here instead.
-const year = new Date().getFullYear()
 
 const lastShow = upcoming.shows.at(-1)
 const firstShow = upcoming.shows[0]
@@ -37,49 +35,7 @@ for (const run of upcoming.runs) {
 // loop has no seam; the second copy is hidden from assistive tech.
 const cities = [...new Set(upcoming.runs.map(run => run.place))]
 
-const person = {
-  '@type': 'Person',
-  '@id': `${siteOrigin}/#mario`,
-  'name': artist.name,
-  'url': `${siteOrigin}/`,
-  'image': [socialImage, socialImageSquare],
-  'jobTitle': 'Stand-up comedian',
-  'homeLocation': { '@type': 'Place', 'name': 'Los Angeles, CA' },
-  'sameAs': [...socials.map(social => social.href), artist.imdb, BANDSINTOWN_URL],
-}
-
-const jsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@graph': [
-    person,
-    ...upcoming.shows.map(show => ({
-      '@type': 'ComedyEvent',
-      'name': `${artist.name}: ${artist.tour}`,
-      'startDate': show.startIso,
-      'eventStatus': 'https://schema.org/EventScheduled',
-      'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
-      'location': {
-        '@type': 'Place',
-        'name': show.venue.name,
-        'address': {
-          '@type': 'PostalAddress',
-          'streetAddress': show.venue.street,
-          'addressLocality': show.venue.city,
-          'addressRegion': show.venue.region,
-          'postalCode': show.venue.postalCode,
-          'addressCountry': show.venue.country,
-        },
-      },
-      'image': [socialImage, socialImageSquare],
-      'performer': { '@id': `${siteOrigin}/#mario` },
-      'offers': {
-        '@type': 'Offer',
-        'url': show.ticketUrl,
-        'availability': show.soldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
-      },
-    })),
-  ],
-}).replaceAll('<', '\\u003c')
+const jsonLd = jsonLdGraph([person(), ...upcoming.shows.map(show => comedyEvent(show))])
 </script>
 
 <!DOCTYPE html>
@@ -88,23 +44,7 @@ const jsonLd = JSON.stringify({
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-nav">
-      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-6">
-        <a href="/" class="display text-[1.65rem] leading-none tracking-tight no-underline" aria-label="Mario Adrion, home">Mario Adrion</a>
-        <nav class="flex items-center gap-7" aria-label="Primary">
-          <a class="nav-link hidden md:inline" href="#tour">Tour</a>
-          <a class="nav-link hidden md:inline" href="#special">Special</a>
-          <a class="nav-link hidden md:inline" href="#about">About</a>
-          <a class="nav-link hidden md:inline" href="#contact">Contact</a>
-          <span class="nav-socials hidden sm:flex">
-            @foreach(navSocials as social)
-              <a class="icon-btn" href="{{ social.href }}" rel="noopener me" target="_blank" aria-label="Mario Adrion on {{ social.label }}" title="{{ social.label }}"><i class="{{ social.icon }}" aria-hidden="true"></i></a>
-            @endforeach
-          </span>
-          <a class="btn btn-accent btn-sm" href="#tour">Get tickets</a>
-        </nav>
-      </div>
-    </header>
+    <SiteHeader />
 
     <main id="main">
       {{-- Hero: the name on the poster, the man in the light. --}}
@@ -170,28 +110,7 @@ const jsonLd = JSON.stringify({
                 </div>
                 <ol class="list-none m-0 p-0">
                   @foreach(month.runs as run)
-                    <li class="run reveal">
-                      <p class="run-dates">{{ run.dates }}</p>
-                      <div>
-                        <p class="run-place">{{ run.place }}</p>
-                        <p class="mt-1.5 muted">{{ run.venue.name }}</p>
-                      </div>
-                      <div class="times" role="list" aria-label="Showtimes at {{ run.venue.name }}">
-                        @foreach(run.shows as show)
-                          @if(show.soldOut)
-                            <span class="time-chip" role="listitem" aria-disabled="true">
-                              <span class="when">{{ show.weekday }} {{ show.time }}</span>
-                              <span class="cta">Sold out</span>
-                            </span>
-                          @else
-                            <a class="time-chip" role="listitem" href="{{ show.ticketUrl }}" rel="noopener" target="_blank" aria-label="Tickets for {{ show.weekday }} {{ show.month }} {{ show.day }} at {{ show.time }}, {{ run.venue.name }}">
-                              <span class="when">{{ show.weekday }} {{ show.time }}</span>
-                              <span class="cta">Tickets</span>
-                            </a>
-                          @endif
-                        @endforeach
-                      </div>
-                    </li>
+                    <TourRun :run="run" />
                   @endforeach
                 </ol>
               </div>
@@ -314,18 +233,6 @@ const jsonLd = JSON.stringify({
       </section>
     </main>
 
-    <footer class="border-t rule">
-      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
-        <p class="display text-3xl">Mario Adrion</p>
-        <nav class="flex flex-wrap gap-x-7 gap-y-3" aria-label="Footer">
-          <a class="nav-link" href="#tour">Tour</a>
-          <a class="nav-link" href="#contact">Contact</a>
-          <a class="nav-link" href="/tour.ics">Calendar feed</a>
-          <a class="nav-link" href="{{ BANDSINTOWN_URL }}" rel="noopener" target="_blank">Bandsintown</a>
-          <a class="nav-link" href="{{ artist.imdb }}" rel="noopener" target="_blank">IMDb</a>
-        </nav>
-        <p class="text-sm muted">&copy; {{ year }} Mario Adrion</p>
-      </div>
-    </footer>
+    <SiteFooter />
   </body>
 </html>

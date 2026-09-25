@@ -121,8 +121,15 @@ export const socialImageAlt = 'Mario Adrion laughing on stage with a microphone,
  * cards, for stx's `useSeoMeta`. One source, so the title, the Open Graph
  * card and the X card cannot disagree.
  */
-export function pageSeo(page: { title: string, description: string, path: string }): SeoMeta {
+export function pageSeo(page: {
+  title: string
+  description: string
+  path: string
+  /** A 1200x630 JPEG card of the page's own. Defaults to the site's card. */
+  image?: { url: string, alt: string }
+}): SeoMeta {
   const url = absolute(page.path)
+  const image = page.image ?? { url: socialImage, alt: socialImageAlt }
 
   return {
     title: page.title,
@@ -134,11 +141,11 @@ export function pageSeo(page: { title: string, description: string, path: string
     ogSiteName: artist.name,
     ogLocale: 'en_US',
     ogUrl: url,
-    ogImage: socialImage,
+    ogImage: image.url,
     ogImageType: 'image/jpeg',
     ogImageWidth: 1200,
     ogImageHeight: 630,
-    ogImageAlt: socialImageAlt,
+    ogImageAlt: image.alt,
     profileFirstName: 'Mario',
     profileLastName: 'Adrion',
     profileUsername: 'marioadrion',

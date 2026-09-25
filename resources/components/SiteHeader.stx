@@ -1,0 +1,50 @@
+<script server>
+import { navSocials, socials } from '../data/site'
+</script>
+
+<script client>
+// The only state is whether the phone menu is open. The panel's links are
+// server-rendered and sit beside the button rather than under a binding, so
+// CSS shows the panel off the button's aria-expanded: nothing in it has to
+// be rendered by the client runtime.
+const open = state(false)
+</script>
+
+<template>
+  <header class="site-nav">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-4">
+      <a href="/" class="display text-[1.65rem] leading-none tracking-tight no-underline whitespace-nowrap shrink-0" aria-label="Mario Adrion, home">Mario Adrion</a>
+      <nav class="flex items-center gap-7" aria-label="Primary">
+        {{-- Absolute, so the same header works on a city page. --}}
+        <a class="nav-link hidden md:inline" href="/#tour">Tour</a>
+        <a class="nav-link hidden md:inline" href="/#special">Special</a>
+        <a class="nav-link hidden md:inline" href="/#about">About</a>
+        <a class="nav-link hidden md:inline" href="/#contact">Contact</a>
+        <span class="nav-socials hidden md:flex">
+          @foreach(navSocials as social)
+            <a class="icon-btn" href="{{ social.href }}" rel="noopener me" target="_blank" aria-label="Mario Adrion on {{ social.label }}" title="{{ social.label }}"><i class="{{ social.icon }}" aria-hidden="true"></i></a>
+          @endforeach
+        </span>
+        <a class="btn btn-accent btn-sm" href="/#tour">Get tickets</a>
+      </nav>
+      <button type="button" class="menu-btn md:hidden" aria-controls="site-menu" :aria-expanded="open() ? 'true' : 'false'" @click="open.set(!open())">
+        <span class="sr-only">Menu</span>
+        <i class="menu-open i-hugeicons-menu-01" aria-hidden="true"></i>
+        <i class="menu-close i-hugeicons-cancel-01" aria-hidden="true"></i>
+      </button>
+      <div id="site-menu" class="mobile-menu md:hidden">
+        <nav class="max-w-[1400px] mx-auto px-4 sm:px-6 py-3" aria-label="Menu">
+          <a class="mobile-link" href="/#tour" @click="open.set(false)">Tour</a>
+          <a class="mobile-link" href="/#special" @click="open.set(false)">Special</a>
+          <a class="mobile-link" href="/#about" @click="open.set(false)">About</a>
+          <a class="mobile-link" href="/#contact" @click="open.set(false)">Contact</a>
+          <div class="mobile-socials">
+            @foreach(socials as social)
+              <a class="icon-btn" href="{{ social.href }}" rel="noopener me" target="_blank" aria-label="Mario Adrion on {{ social.label }}"><i class="{{ social.icon }}" aria-hidden="true"></i></a>
+            @endforeach
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+</template>

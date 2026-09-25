@@ -1,0 +1,24 @@
+<script server>
+import { artist } from '../data/site'
+import { BANDSINTOWN_URL } from '../data/shows'
+
+// stx's template evaluator refuses `new`, so a `{{ new Date() }}` in the
+// markup renders empty. Computed here instead.
+const year = new Date().getFullYear()
+</script>
+
+<template>
+  <footer class="border-t rule">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-12 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+      <p class="display text-3xl">Mario Adrion</p>
+      <nav class="flex flex-wrap gap-x-7 gap-y-3" aria-label="Footer">
+        <a class="nav-link" href="/#tour">Tour</a>
+        <a class="nav-link" href="/#contact">Contact</a>
+        <a class="nav-link" href="/tour.ics">Calendar feed</a>
+        <a class="nav-link" href="{{ BANDSINTOWN_URL }}" rel="noopener" target="_blank">Bandsintown</a>
+        <a class="nav-link" href="{{ artist.imdb }}" rel="noopener" target="_blank">IMDb</a>
+      </nav>
+      <p class="text-sm muted">&copy; {{ year }} Mario Adrion</p>
+    </div>
+  </footer>
+</template>

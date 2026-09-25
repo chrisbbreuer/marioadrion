@@ -14,6 +14,7 @@
 
 import { cache } from '@stacksjs/cache'
 import { isoInZone, zonedTimeToUtc } from '@stacksjs/datetime'
+import { slug } from '@stacksjs/strings'
 import snapshot from './bandsintown-snapshot.json'
 import { venueTimeZone } from './zones'
 
@@ -84,6 +85,8 @@ export interface Run {
   key: string
   venue: Venue
   place: string
+  /** The run's city page, `/tour/<citySlug>`. */
+  citySlug: string
   shows: Show[]
   /** "Oct 1" or "Oct 1 - 4" or "Jan 29 - Feb 1". */
   dates: string
@@ -97,6 +100,20 @@ export interface Tour {
   runs: Run[]
   cities: number
   source: 'live' | 'cached' | 'snapshot'
+}
+
+/** Every upcoming date in one place, which is what a city page shows. */
+export interface City {
+  slug: string
+  /** "Phoenix, AZ" or "London, United Kingdom". */
+  place: string
+  /** The bare city name, "Phoenix". */
+  name: string
+  runs: Run[]
+  shows: Show[]
+  /** "Oct 1 - 4", or "Oct 1 - Dec 12" across more than one run. */
+  dates: string
+  soldOut: boolean
 }
 
 function num(value: string | undefined): number | null {
@@ -153,6 +170,16 @@ export function normaliseEvent(raw: RawEvent): Show | null {
   }
 }
 
+/**
+ * The URL segment for a place: `phoenix-az`, `london-united-kingdom`.
+ *
+ * Built from the place rather than the city alone, so two cities that share a
+ * name (Portland, OR and Portland, ME) never share a page.
+ */
+export function citySlug(venue: Venue): string {
+  return slug(placeOf(venue))
+}
+
 export function placeOf(venue: Venue): string {
   if (venue.country === 'United States' || venue.country === 'Canada' || venue.country === 'Australia')
     return [venue.city, venue.region].filter(Boolean).join(', ')
@@ -194,6 +221,7 @@ export function groupRuns(shows: Show[]): Run[] {
       key: show.id,
       venue: show.venue,
       place: placeOf(show.venue),
+      citySlug: citySlug(show.venue),
       shows: [show],
       dates: '',
       month: show.month,
@@ -208,6 +236,33 @@ export function groupRuns(shows: Show[]): Run[] {
   }
 
   return runs
+}
+
+/** The tour grouped by place, in the order the first date in each comes up. */
+export function citiesOf(tour: Pick<Tour, 'runs'>): City[] {
+  const cities = new Map<string, City>()
+
+  for (const run of tour.runs) {
+    const city = cities.get(run.citySlug) ?? {
+      slug: run.citySlug,
+      place: run.place,
+      name: run.venue.city,
+      runs: [],
+      shows: [],
+      dates: '',
+      soldOut: false,
+    }
+    city.runs.push(run)
+    city.shows.push(...run.shows)
+    cities.set(run.citySlug, city)
+  }
+
+  for (const city of cities.values()) {
+    city.dates = dateRange(city.shows[0]!, city.shows.at(-1)!)
+    city.soldOut = city.shows.every(show => show.soldOut)
+  }
+
+  return [...cities.values()]
 }
 
 export function buildTour(raw: RawEvent[], source: Tour['source'], now = Date.now()): Tour {

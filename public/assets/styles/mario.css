@@ -199,6 +199,42 @@ img { max-width: 100%; height: auto; display: block; }
 .icon-btn:hover { color: var(--paper); background: rgb(255 255 255 / 0.07); }
 .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* Phone menu. Shown off the button's aria-expanded, so the panel itself
+   carries no client binding. */
+.menu-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: -0.5rem;
+  border-radius: 999px;
+  color: var(--paper);
+  font-size: 1.5rem;
+}
+.menu-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.menu-btn .menu-close,
+.menu-btn[aria-expanded="true"] .menu-open { display: none; }
+.menu-btn[aria-expanded="true"] .menu-close { display: inline-block; }
+.mobile-menu {
+  display: none;
+  position: absolute;
+  inset: 4rem 0 auto 0;
+  background: var(--ink);
+  border-bottom: 1px solid var(--rule);
+}
+.menu-btn[aria-expanded="true"] + .mobile-menu { display: block; }
+.mobile-link {
+  display: block;
+  padding: 0.85rem 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--paper);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+.mobile-socials { display: flex; flex-wrap: wrap; gap: 0.25rem; padding-top: 0.75rem; margin-left: -0.5rem; }
+@media (min-width: 768px) { .menu-btn, .mobile-menu { display: none !important; } }
+
 /* ---------- Hero ---------- */
 
 .hero-stage {
@@ -536,3 +572,23 @@ img { max-width: 100%; height: auto; display: block; }
     }
   }
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* A run's place links to its city page. Reads as the heading it was. */
+.run-place-link { color: inherit; text-decoration: none; }
+.run-place-link:hover { color: var(--accent); }
+.run-place-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+/* City page: the other places on the tour. */
+.more-city {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1rem 0;
+  color: var(--paper);
+  text-decoration: none;
+  transition: color 0.2s var(--ease);
+}
+.more-city:hover { color: var(--accent); }

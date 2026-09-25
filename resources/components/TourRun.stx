@@ -1,0 +1,38 @@
+<script server>
+import type { Run } from '../data/shows'
+
+const props = defineProps<{ run: Run, linkPlace?: boolean }>()
+const run = props.run
+// On a city page the place is the page itself; linking it would go nowhere.
+const linkPlace = props.linkPlace !== false
+</script>
+
+<template>
+  <li class="run reveal">
+    <p class="run-dates">{{ run.dates }}</p>
+    <div>
+      @if(linkPlace)
+        <a class="run-place run-place-link" href="/tour/{{ run.citySlug }}">{{ run.place }}</a>
+        <p class="mt-1.5 muted">{{ run.venue.name }}</p>
+      @else
+        {{-- On the city page the place is the page's own heading; the venue is what differs between runs. --}}
+        <p class="run-place">{{ run.venue.name }}</p>
+      @endif
+    </div>
+    <div class="times" role="list" aria-label="Showtimes at {{ run.venue.name }}">
+      @foreach(run.shows as show)
+        @if(show.soldOut)
+          <span class="time-chip" role="listitem" aria-disabled="true">
+            <span class="when">{{ show.weekday }} {{ show.time }}</span>
+            <span class="cta">Sold out</span>
+          </span>
+        @else
+          <a class="time-chip" role="listitem" href="{{ show.ticketUrl }}" rel="noopener" target="_blank" aria-label="Tickets for {{ show.weekday }} {{ show.month }} {{ show.day }} at {{ show.time }}, {{ run.venue.name }}" data-analyticshq-event="Ticket click" data-analyticshq-city="{{ run.place }}" data-analyticshq-venue="{{ run.venue.name }}" data-analyticshq-date="{{ show.wallClock }}">
+            <span class="when">{{ show.weekday }} {{ show.time }}</span>
+            <span class="cta">Tickets</span>
+          </a>
+        @endif
+      @endforeach
+    </div>
+  </li>
+</template>

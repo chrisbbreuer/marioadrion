@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import snapshot from '../../resources/data/bandsintown-snapshot.json'
-import { buildTour, groupRuns, normaliseEvent } from '../../resources/data/shows'
+import { buildTour, citiesOf, citySlug, groupRuns, normaliseEvent } from '../../resources/data/shows'
 import { venueTimeZone } from '../../resources/data/zones'
 
 // The snapshot was taken on 2026-09-24; pin "now" before the first show so
@@ -60,5 +60,37 @@ describe('shows', () => {
   it('skips an event it cannot place in time rather than inventing one', () => {
     expect(normaliseEvent({ id: 'x', url: '', datetime: 'soon', venue: { name: 'Club', city: 'A', region: 'CA', country: 'United States' } } as any)).toBeNull()
     expect(groupRuns([])).toEqual([])
+  })
+})
+
+describe('cities', () => {
+  const tour = buildTour(snapshot as any, 'snapshot', BEFORE_TOUR)
+  const cities = citiesOf(tour)
+
+  it('gives each place one page, named for the place', () => {
+    expect(cities.length).toBe(tour.cities)
+    expect(new Set(cities.map(city => city.slug)).size).toBe(cities.length)
+    expect(cities.map(city => city.slug)).toContain('phoenix-az')
+    expect(cities.map(city => city.slug)).toContain('west-hollywood-ca')
+  })
+
+  it('keeps two cities of the same name apart', () => {
+    const venue = { name: 'Club', street: '', postalCode: '', latitude: null, longitude: null, country: 'United States' }
+    expect(citySlug({ ...venue, city: 'Portland', region: 'OR' })).not.toBe(citySlug({ ...venue, city: 'Portland', region: 'ME' }))
+  })
+
+  it('collects every run in a place, in tour order', () => {
+    // The Belly Room's monthly shows are separate runs, all in West Hollywood.
+    const weho = cities.find(city => city.slug === 'west-hollywood-ca')!
+    expect(weho.runs.length).toBe(3)
+    expect(weho.dates).toBe('Oct 29 - Dec 19')
+    expect(weho.shows.length).toBe(weho.runs.reduce((n, run) => n + run.shows.length, 0))
+    const starts = weho.shows.map(show => show.startsAt.getTime())
+    expect(starts).toEqual([...starts].sort((a, b) => a - b))
+  })
+
+  it('links every run to its city page', () => {
+    for (const run of tour.runs)
+      expect(cities.some(city => city.slug === run.citySlug)).toBe(true)
   })
 })

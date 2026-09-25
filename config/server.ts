@@ -36,7 +36,10 @@ export default {
    * unreachable.
    */
   proxy: {
-    prefixes: [],
+    // The framework's signed unsubscribe link, from the city alert emails,
+    // and the city pages' share cards, drawn on request. Nothing in
+    // public/social/tour/ to shadow.
+    prefixes: ['/_stacks/email/', '/social/tour/'],
     // Root GET routes from routes/web.ts: the tour calendar feed and the two
     // files crawlers ask for. None of them has a public/ file to shadow.
     paths: ['/tour.ics', '/robots.txt', '/sitemap.xml'],

@@ -1,6 +1,10 @@
 <script server>
-const props = defineProps<{ formUuid?: string | null }>()
+const props = defineProps<{ formUuid?: string | null, city?: string, region?: string }>()
 const formUuid = props.formUuid ?? ''
+// A city page fills in its own place, so asking for "Phoenix" again on the
+// Phoenix page is one field, the email.
+const presetCity = props.city ?? ''
+const presetRegion = props.region ?? ''
 </script>
 
 <script client>
@@ -16,6 +20,16 @@ const sending = state(false)
 const done = state('')
 const errors = state<Record<string, string>>({})
 const openedAt = Date.now()
+
+onMount(() => {
+  city.set(host()?.dataset.city ?? '')
+  region.set(host()?.dataset.region ?? '')
+
+  // This page may come from the CDN cache, which cannot carry the CSRF cookie
+  // the submit route checks. The form's own definition is a GET the API
+  // answers with one, so the data layer fetches it first when it is missing.
+  stx.configureFetch({ csrf: { prime: `/api/forms/${host()?.dataset.formUuid ?? ''}` } })
+})
 
 async function submit(event: Event): Promise<void> {
   event.preventDefault()
@@ -57,19 +71,19 @@ async function submit(event: Event): Promise<void> {
 </script>
 
 <template>
-  <div ref="city-form" data-form-uuid="{{ formUuid }}" class="city-form">
+  <div ref="city-form" data-form-uuid="{{ formUuid }}" data-city="{{ presetCity }}" data-region="{{ presetRegion }}" class="city-form">
     <p :if="done()" class="city-done" role="status">{{ done() }}</p>
 
     <form :else @submit="submit" novalidate>
       <div class="grid gap-5 sm:grid-cols-2">
         <div class="grid gap-2">
           <label for="city-name" class="field-label">City</label>
-          <input id="city-name" name="city" type="text" autocomplete="address-level2" required class="field" @input="city.set($event.target.value)">
+          <input id="city-name" name="city" type="text" autocomplete="address-level2" required class="field" :value="city()" @input="city.set($event.target.value)">
           <p :if="errors().city" class="field-error">{{ errors().city }}</p>
         </div>
         <div class="grid gap-2">
           <label for="city-region" class="field-label">State or country</label>
-          <input id="city-region" name="region" type="text" autocomplete="address-level1" class="field" @input="region.set($event.target.value)">
+          <input id="city-region" name="region" type="text" autocomplete="address-level1" class="field" :value="region()" @input="region.set($event.target.value)">
         </div>
         <div class="grid gap-2 sm:col-span-2">
           <label for="city-email" class="field-label">Email <span class="field-hint">optional, to hear when tickets go on sale</span></label>

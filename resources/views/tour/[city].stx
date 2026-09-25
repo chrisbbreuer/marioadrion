@@ -1,0 +1,141 @@
+<script server>
+import { cityCardAlt, cityCardUrl } from '../../data/city-cards'
+import { cityRequestFormUuid } from '../../data/city-requests'
+import { citiesOf, tour } from '../../data/shows'
+import { absolute, artist, pageSeo } from '../../data/site'
+import { comedyEvent, jsonLdGraph, person } from '../../data/structured-data'
+
+declare const params: Record<string, string>
+
+// One await for the whole page. stx drops every const after a second
+// top-level await, so both sources resolve together.
+const [upcoming, formUuid] = await Promise.all([tour(), cityRequestFormUuid()])
+
+const cities = citiesOf(upcoming)
+const city = cities.find(candidate => candidate.slug === String(params?.city ?? '')) ?? null
+// A city drops off when its last show is over. A real 404, not a 200 page
+// that says so, so the URL leaves search results with the dates.
+if (!city)
+  notFound()
+
+const otherCities = cities.filter(candidate => candidate !== city)
+const venue = city?.runs[0]!.venue
+const years = city ? [...new Set(city.shows.map(show => show.year))].join(' - ') : ''
+const showCount = city ? `${city.shows.length} ${city.shows.length === 1 ? 'show' : 'shows'}` : ''
+
+// Everywhere the dates are, one venue per entry, with an address to walk to.
+const venues = city
+  ? [...new Map(city.runs.map(run => [run.venue.name, run.venue])).values()].map(place => ({
+      name: place.name,
+      address: [place.street, [place.city, place.region, place.postalCode].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+      directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([place.name, place.street, place.city, place.region].filter(Boolean).join(', '))}`,
+    }))
+  : []
+
+// The request form, filled in with this place: region is the state in the
+// US, Canada and Australia, the country everywhere else.
+const presetRegion = venue ? (['United States', 'Canada', 'Australia'].includes(venue.country) ? venue.region : venue.country) : ''
+
+if (city) {
+  useSeoMeta(pageSeo({
+    title: `Mario Adrion in ${city.place} | Tickets for ${city.dates}, ${years}`,
+    description: `Mario Adrion brings ${artist.tour} to ${venues.map(place => place.name.split(':')[0]).join(' and ')} in ${city.place}: ${showCount}, ${city.dates}, ${years}. Showtimes and tickets.`,
+    path: `/tour/${city.slug}`,
+    image: { url: cityCardUrl(city), alt: cityCardAlt(city) },
+  }))
+}
+else {
+  useSeoMeta({ title: 'No shows here right now | Mario Adrion', robots: 'noindex, nofollow' })
+}
+
+const jsonLd = city
+  ? jsonLdGraph([
+      person(),
+      ...city.shows.map(show => comedyEvent(show, [cityCardUrl(city)])),
+      {
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          { '@type': 'ListItem', 'position': 1, 'name': 'Tour', 'item': absolute('/#tour') },
+          { '@type': 'ListItem', 'position': 2, 'name': city.place, 'item': absolute(`/tour/${city.slug}`) },
+        ],
+      },
+    ])
+  : undefined
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>@include('head')</head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <SiteHeader />
+
+    <main id="main">
+      @if(city)
+        <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-14 md:pt-24 pb-16 md:pb-24" aria-labelledby="city-title">
+          <nav class="text-sm muted" aria-label="Breadcrumb"><a class="nav-link" href="/#tour">Tour</a> <span aria-hidden="true">/</span> {{ city.place }}</nav>
+          <p class="eyebrow mt-8">{{ artist.tour }}</p>
+          <h1 id="city-title" class="display text-[clamp(3.5rem,11vw,9rem)] mt-4">{{ city.name }}</h1>
+          <p class="mt-6 text-lg md:text-xl muted max-w-[42ch] leading-relaxed">Mario Adrion live in {{ city.place }}: {{ showCount }}, {{ city.dates }}, {{ years }}. Pick a showtime for tickets.</p>
+
+          <ol class="list-none m-0 p-0 mt-12 max-w-4xl">
+            @foreach(city.runs as run)
+              <TourRun :run="run" :link-place="false" />
+            @endforeach
+          </ol>
+
+          <div class="mt-14 grid gap-4 md:grid-cols-2 max-w-4xl">
+            @foreach(venues as place)
+              <div class="surface rounded-[14px] p-6">
+                <p class="font-semibold">{{ place.name }}</p>
+                <p class="mt-1 muted">{{ place.address }}</p>
+                <a class="btn btn-ghost btn-sm mt-5" href="{{ place.directions }}" rel="noopener" target="_blank"><i class="i-hugeicons-location-01 text-base" aria-hidden="true"></i> Directions</a>
+              </div>
+            @endforeach
+          </div>
+        </section>
+
+        <section class="border-y rule" aria-labelledby="alerts-title">
+          <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16 md:py-24 grid md:grid-cols-12 gap-10">
+            <div class="md:col-span-5">
+              <h2 id="alerts-title" class="heading text-[clamp(2.2rem,4.5vw,3.5rem)]">Can't make these dates?</h2>
+              <p class="mt-4 text-lg muted max-w-[40ch]">Leave your email and you'll hear the next time Mario plays {{ city.name }}.</p>
+            </div>
+            <div class="md:col-span-7">
+              @if(formUuid)
+                <CityRequestForm :form-uuid="formUuid" :city="city.name" :region="presetRegion" />
+              @endif
+            </div>
+          </div>
+        </section>
+
+        @if(otherCities.length > 0)
+          <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-16 md:py-24" aria-labelledby="more-title">
+            <h2 id="more-title" class="heading text-[clamp(2.2rem,4.5vw,3.5rem)]">More dates</h2>
+            <ul class="list-none m-0 p-0 mt-8 grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
+              @foreach(otherCities as other)
+                <li class="border-t rule">
+                  <a class="more-city" href="/tour/{{ other.slug }}">
+                    <span class="font-semibold">{{ other.place }}</span>
+                    <span class="muted text-sm">{{ other.dates }}</span>
+                  </a>
+                </li>
+              @endforeach
+            </ul>
+          </section>
+        @endif
+      @else
+        <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24 md:py-36">
+          <div class="max-w-2xl">
+            <h1 class="heading text-[clamp(2.6rem,6vw,4.5rem)]">No shows here right now</h1>
+            <p class="mt-6 text-lg muted leading-relaxed">Mario isn't booked in this city at the moment. Every upcoming date is on the tour page, and you can ask him to come back from there.</p>
+            <a class="btn btn-accent mt-10" href="/#tour">See the tour</a>
+          </div>
+        </section>
+      @endif
+    </main>
+
+    <SiteFooter />
+  </body>
+</html>
