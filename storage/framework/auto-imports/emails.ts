@@ -5,6 +5,8 @@
 // resolves. Values are paths rather than import thunks on purpose: thunks
 // would make every compilation that touches a name resolve every module.
 export const emails = {
+  'city-alert': '../../../resources/emails/city-alert.stx',
+  'city-digest': '../../../resources/emails/city-digest.stx',
   'order-confirmation': '../../../resources/emails/order-confirmation.stx',
   'subscription-confirmation': '../../../resources/emails/subscription-confirmation.stx',
   'email-verification': '../defaults/resources/emails/email-verification.stx',
