@@ -3,20 +3,21 @@ import type { AnalyticsConfig } from '@stacksjs/types'
 /**
  * **Analytics Configuration**
  *
- * This configuration defines all of your Analytics options. Because Stacks is fully-typed,
- * you may hover any of the options below and the definitions will be provided. In case
- * you have any questions, feel free to reach out via Discord or GitHub Discussions.
+ * AnalyticsHQ (https://analyticshq.org): cookie-free, so no consent banner.
+ * The site lives in Chris's AnalyticsHQ account; the tag is rendered by
+ * resources/partials/head.stx in production only, so local development
+ * never counts as a visit.
+ *
+ * Ticket clicks are custom events declared in markup
+ * (`data-analyticshq-event="Ticket click"` in resources/components/TourRun.stx),
+ * with the city, venue and show time as properties.
  */
 export default {
-  driver: 'fathom',
+  driver: 'analyticshq',
 
   drivers: {
-    googleAnalytics: {
-      trackingId: 'UA-XXXXXXXXX-X',
-    },
-
-    fathom: {
-      siteId: 'WOLZMJDL',
+    analyticshq: {
+      siteId: 'd61994a9bf380d24c81029c3',
     },
   },
 } satisfies AnalyticsConfig

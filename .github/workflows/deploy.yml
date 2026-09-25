@@ -213,8 +213,17 @@ jobs:
             sleep 10
           done
 
-          curl -fsS -D - -o /dev/null "$url" | grep -qi '^set-cookie: X-CSRF-Token=' \
-            || { echo "::error::The page no longer sets the CSRF cookie - the city form would 403. Is Cloudflare caching the HTML?"; exit 1; }
+          # Pages are held at the edge, so they carry no cookie; the city form
+          # primes its CSRF cookie from the API, which must never be cached.
+          curl -fsS -D - -o /dev/null "${url}api/shows" | grep -qi '^set-cookie: X-CSRF-Token=' \
+            || { echo "::error::The API no longer sets the CSRF cookie - the city form would 403. Is Cloudflare caching /api/?"; exit 1; }
+          # And the pages really are served from the edge: a second request hits.
+          curl -fsS -o /dev/null "$url"
+          cache=$(curl -fsS -D - -o /dev/null "$url" | grep -i '^cf-cache-status:' | tr -d '\r' | awk '{print $2}')
+          echo "Home page edge cache: ${cache:-none}"
+          [ "$cache" = HIT ] || echo "::warning::The home page is not being served from the edge cache (cf-cache-status: ${cache:-none})."
+          curl -fsS -o /dev/null "${url}tour/$(curl -fsS "${url}api/shows" | bun -e 'const t = JSON.parse(await Bun.stdin.text()); console.log(t.runs[0]?.citySlug ?? "")')" \
+            || { echo "::error::The first city page does not answer."; exit 1; }
           shows=$(curl -fsS "${url}api/shows" | bun -e 'console.log(JSON.parse(await Bun.stdin.text()).shows.length)')
           echo "Tour API answers with $shows shows."
           curl -fsS -o /dev/null "${url}tour.ics" || { echo "::error::/tour.ics is not being served."; exit 1; }

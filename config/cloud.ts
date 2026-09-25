@@ -96,10 +96,19 @@ export const tsCloud: TsCloudConfig = {
             cache: {
               // Photos and fonts: stable URLs, content-addressed variants.
               assetEdgeTtl: 2592000,
-              // Never the HTML. A cached page cannot carry the per-visitor
-              // CSRF cookie, so the city form would 403 while looking fine,
-              // and the tour list changes when Bandsintown does.
-              documentEdgeTtl: 0,
+              // Pages, five minutes. The box is in Germany and most fans are
+              // in the US: served from the origin, every page paid ~0.6s for
+              // the trip before the first byte. The tour list changes only
+              // when Bandsintown does, and a deploy purges the edge.
+              //
+              // A cached page cannot carry Set-Cookie, so it brings no CSRF
+              // cookie. The city form primes one from /api/forms/<uuid> before
+              // it posts (stx `csrf.prime`), which is why /api/ must never be
+              // cached: a cached API response would lose its cookie too.
+              documentEdgeTtl: 300,
+              // The API and the framework's signed email links answer per
+              // request, and the API is what hands out the CSRF cookie.
+              bypassPaths: ['/api/', '/_stacks/'],
             },
             purgeOnDeploy: true,
           },
@@ -138,7 +147,7 @@ export const tsCloud: TsCloudConfig = {
         API_URL: 'http://127.0.0.1:3238',
         // Only the forms bundle: the city-request form posts to it. Naming a
         // bundle keeps auth, the dashboard and the storefront unmounted.
-        STACKS_DEFAULT_ROUTES: 'forms',
+        STACKS_DEFAULT_ROUTES: 'forms,email',
         DB_CONNECTION: 'sqlite',
         DB_DATABASE: '/var/lib/marioadrion/stacks.sqlite',
         DB_DATABASE_PATH: '/var/lib/marioadrion/stacks.sqlite',
@@ -167,7 +176,7 @@ export const tsCloud: TsCloudConfig = {
         APP_NAME: 'Mario Adrion',
         APP_URL: APP_DOMAIN,
         APP_KEY: env.APP_KEY || '',
-        STACKS_DEFAULT_ROUTES: 'forms',
+        STACKS_DEFAULT_ROUTES: 'forms,email',
         DB_CONNECTION: 'sqlite',
         DB_DATABASE: '/var/lib/marioadrion/stacks.sqlite',
         DB_DATABASE_PATH: '/var/lib/marioadrion/stacks.sqlite',

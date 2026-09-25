@@ -1,4 +1,12 @@
 <script server>
+import { env } from '@stacksjs/env'
+import { generateAnalyticsScript } from '@stacksjs/analytics'
+import analytics from '../../config/analytics'
+
+// The AnalyticsHQ tag from config/analytics.ts, in production only: a local
+// dev server should never show up as a visitor.
+const analyticsTag = env.APP_ENV === 'production' ? generateAnalyticsScript(analytics) : ''
+
 // Owned by the including page, which is the one thing a partial should take
 // from its scope. Declared so the template typechecks; `declare` emits no
 // code, so the page's values are what render.
@@ -31,6 +39,8 @@ declare const jsonLd: string | undefined
 <link rel="stylesheet" href="/assets/styles/mario.css">
 
 <link rel="alternate" type="text/calendar" title="Mario Adrion tour dates" href="/tour.ics">
+
+{!! analyticsTag !!}
 
 @if (typeof jsonLd !== 'undefined' && jsonLd)
   <script type="application/ld+json">{!! jsonLd !!}</script>

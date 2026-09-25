@@ -23,7 +23,7 @@ const embed = derived(() => {
 <template>
   <div ref="special-player" data-video-id="{{ videoId }}" class="special-frame">
     <Photo name="my-struggle" sizes="(min-width: 1024px) 62vw, 100vw" class="special-still" />
-    <button type="button" class="special-poster" @click="playing.set(true)" aria-label="Play My Struggle, the full special">
+    <button type="button" class="special-poster" @click="playing.set(true)" aria-label="Play My Struggle, the full special" data-analyticshq-event="Play special" data-analyticshq-video="my-struggle">
       <span class="special-play" aria-hidden="true"><i class="i-hugeicons-play"></i></span>
     </button>
     <iframe :if="playing()" :src="embed()" title="My Struggle by Mario Adrion" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
