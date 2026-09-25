@@ -10,7 +10,8 @@
  */
 
 import type { CreateFormInput } from '@stacksjs/forms'
-import { createForm, loadFormByHandle } from '@stacksjs/forms'
+import type { CityRequest } from './alerts'
+import { createForm, fetchSubmissions, loadFormByHandle } from '@stacksjs/forms'
 
 export const CITY_REQUEST_HANDLE = 'where-to-perform'
 
@@ -46,4 +47,38 @@ export async function cityRequestFormUuid(): Promise<string | null> {
     console.warn(`[city-requests] ${error instanceof Error ? error.message : String(error)}`)
     return null
   }
+}
+
+/** A request as the alert and digest jobs read it, with when it arrived. */
+export interface StoredCityRequest extends CityRequest {
+  submittedAt: string | null
+}
+
+/**
+ * Every request ever left, oldest first, or nothing when the form has not
+ * been provisioned yet. Read in pages because `fetchSubmissions` is the admin
+ * list and pages itself.
+ */
+export async function loadCityRequests(): Promise<StoredCityRequest[]> {
+  const form = await loadFormByHandle(null, CITY_REQUEST_HANDLE)
+  if (!form)
+    return []
+
+  const requests: StoredCityRequest[] = []
+  const pageSize = 500
+  for (let offset = 0; ; offset += pageSize) {
+    const page = await fetchSubmissions(form.id, { limit: pageSize, offset })
+    for (const row of page) {
+      requests.push({
+        city: String(row.values.city ?? ''),
+        region: String(row.values.region ?? ''),
+        email: row.email ?? (typeof row.values.email === 'string' ? row.values.email : null),
+        submittedAt: row.submittedAt,
+      })
+    }
+    if (page.length < pageSize)
+      break
+  }
+
+  return requests.reverse()
 }

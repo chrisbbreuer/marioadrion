@@ -1,0 +1,49 @@
+<script server>
+import { pageSeo } from '../data/site'
+
+declare const query: Record<string, string>
+
+// Set by the unsubscribe route in routes/web.ts when the signed link was
+// older than a year or had been altered.
+const expired = query?.expired === '1'
+
+useSeoMeta({
+  ...pageSeo({
+    title: 'Unsubscribed | Mario Adrion',
+    description: 'You will not get any more show emails from Mario Adrion.',
+    path: '/unsubscribed',
+  }),
+  // A page nobody should find by searching.
+  robots: 'noindex, nofollow',
+})
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>@include('head')</head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <SiteHeader />
+
+    <main id="main">
+      <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-24 md:py-36">
+        <div class="max-w-2xl">
+          @if(expired)
+            <h1 class="heading text-[clamp(2.6rem,6vw,4.5rem)]">That link has expired</h1>
+            <p class="mt-6 text-lg muted leading-relaxed">Unsubscribe links last a year. The one in the most recent show email from Mario will work.</p>
+          @else
+            <h1 class="heading text-[clamp(2.6rem,6vw,4.5rem)]">You're unsubscribed</h1>
+            <p class="mt-6 text-lg muted leading-relaxed">No more show emails. If Mario plays your city, you'll find it on the tour page.</p>
+          @endif
+          <div class="mt-10 flex flex-wrap gap-3">
+            <a class="btn btn-accent" href="/#tour">See the tour</a>
+            <a class="btn btn-ghost" href="/">Home</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <SiteFooter />
+  </body>
+</html>

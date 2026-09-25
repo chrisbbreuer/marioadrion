@@ -277,6 +277,13 @@ const envSchema = defineEnv({
     validation: schema.string(),
     default: '',
   },
+
+  // Who gets the Monday digest of city requests (app/Jobs/SendCityDigest.ts),
+  // comma-separated. Empty sends nothing.
+  CITY_DIGEST_TO: {
+    validation: schema.string(),
+    default: '',
+  },
 })
 
 export default envSchema
