@@ -99,18 +99,18 @@
     "docs:agent-counts:check": "./buddy docs:agent-counts:check"
   },
   "dependencies": {
-    "@stacksjs/actions": "^0.75.11",
-    "@stacksjs/analytics": "^0.75.11",
-    "@stacksjs/cache": "^0.75.11",
-    "@stacksjs/calendar-api": "^0.75.11",
-    "@stacksjs/datetime": "^0.75.11",
-    "@stacksjs/env": "^0.75.11",
-    "@stacksjs/forms": "^0.75.11",
-    "@stacksjs/image": "^0.75.11",
-    "@stacksjs/path": "^0.75.11",
-    "@stacksjs/strings": "^0.75.11",
+    "@stacksjs/actions": "^0.75.13",
+    "@stacksjs/analytics": "^0.75.13",
+    "@stacksjs/cache": "^0.75.13",
+    "@stacksjs/calendar-api": "^0.75.13",
+    "@stacksjs/datetime": "^0.75.13",
+    "@stacksjs/env": "^0.75.13",
+    "@stacksjs/forms": "^0.75.13",
+    "@stacksjs/image": "^0.75.13",
+    "@stacksjs/path": "^0.75.13",
+    "@stacksjs/strings": "^0.75.13",
     "pickier": "^0.1.65",
-    "stacks": "^0.75.11"
+    "stacks": "^0.75.13"
   },
   "workspaces": [
     "storage/framework",
