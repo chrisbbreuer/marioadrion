@@ -99,18 +99,18 @@
     "docs:agent-counts:check": "./buddy docs:agent-counts:check"
   },
   "dependencies": {
-    "@stacksjs/actions": "^0.75.463",
-    "@stacksjs/analytics": "^0.75.463",
-    "@stacksjs/cache": "^0.75.463",
-    "@stacksjs/calendar-api": "^0.75.463",
-    "@stacksjs/datetime": "^0.75.463",
-    "@stacksjs/env": "^0.75.463",
-    "@stacksjs/forms": "^0.75.463",
-    "@stacksjs/image": "^0.75.463",
-    "@stacksjs/path": "^0.75.463",
-    "@stacksjs/strings": "^0.75.463",
-    "pickier": "^0.1.65",
-    "stacks": "^0.75.463"
+    "@stacksjs/actions": "^0.75.506",
+    "@stacksjs/analytics": "^0.75.506",
+    "@stacksjs/cache": "^0.75.506",
+    "@stacksjs/calendar-api": "^0.75.506",
+    "@stacksjs/datetime": "^0.75.506",
+    "@stacksjs/env": "^0.75.506",
+    "@stacksjs/forms": "^0.75.506",
+    "@stacksjs/image": "^0.75.506",
+    "@stacksjs/path": "^0.75.506",
+    "@stacksjs/strings": "^0.75.506",
+    "pickier": "^0.1.88",
+    "stacks": "^0.75.506"
   },
   "workspaces": [
     "storage/framework",
@@ -126,6 +126,6 @@
     "commit-msg": "bun x gitlint --edit \"$1\""
   },
   "devDependencies": {
-    "better-dx": "^0.2.25"
+    "better-dx": "^0.2.38"
   }
 }
